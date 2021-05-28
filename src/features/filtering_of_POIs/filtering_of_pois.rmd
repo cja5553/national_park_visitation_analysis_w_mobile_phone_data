@@ -1,0 +1,182 @@
+---
+title: "Filtering of POIs"
+author: "Charles Alba"
+date: "January 30, 2021"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Install the neccessary Packages
+
+```{r}
+require(sp)  
+require(rgdal)
+require(maps)
+args = commandArgs(trailingOnly=TRUE)
+```
+
+# Read and filter poi dataset part 1 based on National park geometry 
+part 1.  
+
+```{r}
+
+org_data<-read.csv("core_poi-part1.csv")
+org_data<-subset(org_data,!is.na(org_data$latitude))
+org_data<-subset(org_data,!is.na(org_data$longitude))
+org_data$row_number<-rownames(org_data)
+data<-read.csv("core_poi-part1.csv")
+data<-subset(data,!is.na(data$latitude))
+data<-subset(data,!is.na(data$longitude))
+data$row_number<-rownames(data)
+coordinates(data)<-c("longitude","latitude")
+poly <- readOGR("National_Parks","National_Parks")
+
+
+poly_wgs84 <- spTransform(poly, CRS("+proj=longlat +datum=WGS84"))
+proj4string(data)<-proj4string(poly_wgs84)
+plot(poly_wgs84)
+plot(data, add=TRUE, col="red")
+poly_ID<-over(data, poly_wgs84)
+poly_ID<-poly_ID[!is.na(poly_ID$OBJECTID), ]
+poly_ID$row_number<-rownames(poly_ID)
+newData <- merge(poly_ID, org_data, by.x="row_number", by.y="row_number", all.x=T)
+```
+
+# Read and filter poi dataset part 2 based on National park geometry 
+part 2.  
+
+```{r}
+org_data2<-read.csv("core_poi-part2.csv")
+org_data2<-subset(org_data2,!is.na(org_data2$latitude))
+org_data2<-subset(org_data2,!is.na(org_data2$longitude))
+org_data2$row_number<-rownames(org_data2)
+data2<-read.csv("core_poi-part2.csv")
+data2<-subset(data2,!is.na(data2$latitude))
+data2<-subset(data2,!is.na(data2$longitude))
+data2$row_number<-rownames(data2)
+coordinates(data2)<-c("longitude","latitude")
+poly2 <- readOGR("National_Parks","National_Parks")
+
+
+poly_wgs84_2 <- spTransform(poly2, CRS("+proj=longlat +datum=WGS84"))
+proj4string(data2)<-proj4string(poly_wgs84_2)
+#plot(poly_wgs84)
+#plot(data, add=TRUE, col="red")
+poly_ID2<-over(data2, poly_wgs84_2)
+poly_ID2<-poly_ID2[!is.na(poly_ID2$OBJECTID), ]
+poly_ID2$row_number<-rownames(poly_ID2)
+newData2 <- merge(poly_ID2, org_data2, by.x="row_number", by.y="row_number", all.x=T)
+
+```
+# Read and filter poi dataset part 3 based on National park geometry 
+part 3.  
+
+```{r}
+org_data3<-read.csv("core_poi-part3.csv")
+org_data3<-subset(org_data3,!is.na(org_data3$latitude))
+org_data3<-subset(org_data3,!is.na(org_data3$longitude))
+org_data3$row_number<-rownames(org_data3)
+data3<-read.csv("core_poi-part3.csv")
+data3<-subset(data3,!is.na(data3$latitude))
+data3<-subset(data3,!is.na(data3$longitude))
+data3$row_number<-rownames(data3)
+coordinates(data3)<-c("longitude","latitude")
+poly3 <- readOGR("National_Parks","National_Parks")
+
+
+poly_wgs84_3 <- spTransform(poly3, CRS("+proj=longlat +datum=WGS84"))
+proj4string(data3)<-proj4string(poly_wgs84_3)
+#plot(poly_wgs84)
+#plot(data, add=TRUE, col="red")
+poly_ID3<-over(data3, poly_wgs84_3)
+poly_ID3<-poly_ID3[!is.na(poly_ID3$OBJECTID), ]
+poly_ID3$row_number<-rownames(poly_ID3)
+newData3 <- merge(poly_ID3, org_data3, by.x="row_number", by.y="row_number", all.x=T)
+
+```
+# Read and filter poi dataset part 4 based on National park geometry 
+part 4.
+
+
+```{r}
+org_data4<-read.csv("core_poi-part4.csv")
+org_data4<-subset(org_data4,!is.na(org_data4$latitude))
+org_data4<-subset(org_data4,!is.na(org_data4$longitude))
+org_data4$row_number<-rownames(org_data4)
+data4<-read.csv("core_poi-part4.csv")
+data4<-subset(data4,!is.na(data4$latitude))
+data4<-subset(data4,!is.na(data4$longitude))
+data4$row_number<-rownames(data4)
+coordinates(data4)<-c("longitude","latitude")
+poly4 <- readOGR("National_Parks","National_Parks")
+
+
+poly_wgs84_4 <- spTransform(poly4, CRS("+proj=longlat +datum=WGS84"))
+proj4string(data4)<-proj4string(poly_wgs84_4)
+#plot(poly_wgs84)
+#plot(data, add=TRUE, col="red")
+poly_ID4<-over(data4, poly_wgs84_4)
+poly_ID4<-poly_ID4[!is.na(poly_ID4$OBJECTID), ]
+poly_ID4$row_number<-rownames(poly_ID4)
+newData4 <- merge(poly_ID4, org_data4, by.x="row_number", by.y="row_number", all.x=T)
+
+```
+
+# Read and filter poi dataset part 5 based on National park geometry 
+part 5.  
+
+```{r}
+org_data5<-read.csv("core_poi-part5.csv")
+org_data5<-subset(org_data5,!is.na(org_data5$latitude))
+org_data5<-subset(org_data5,!is.na(org_data5$longitude))
+org_data5$row_number<-rownames(org_data5)
+data5<-read.csv("core_poi-part5.csv")
+data5<-subset(data5,!is.na(data5$latitude))
+data5<-subset(data5,!is.na(data5$longitude))
+data5$row_number<-rownames(data5)
+coordinates(data5)<-c("longitude","latitude")
+poly5 <- readOGR("National_Parks","National_Parks")
+
+
+poly_wgs84_5 <- spTransform(poly5, CRS("+proj=longlat +datum=WGS84"))
+proj4string(data5)<-proj4string(poly_wgs84_5)
+#plot(poly_wgs84)
+#plot(data, add=TRUE, col="red")
+poly_ID5<-over(data5, poly_wgs84_5)
+poly_ID5<-poly_ID5[!is.na(poly_ID5$OBJECTID), ]
+poly_ID5$row_number<-rownames(poly_ID5)
+newData5 <- merge(poly_ID5, org_data5, by.x="row_number", by.y="row_number", all.x=T)
+
+```
+# Concatenate data  
+
+Concatenate the 5 datasets  (newData)
+
+```{r}
+filtered_pois <- rbind(newData, newData2, newData3, newData4, newData5)
+```
+
+# Write data  
+
+```{r}
+filtered_pois = subset(filtered_pois, select = -c(row_number))
+filtered_pois<-data.table(filtered_pois)
+write.csv(filtered_pois,'filtered_pois.csv')
+```
+
+# further filtering for simplicity purposes  
+
+
+```{r}
+filtered_pois = subset(filtered_pois, select = c(UNIT_NAME,UNIT_TYPE,PARKNAME,pPolyID,placekey,safegraph_place_id, parent_placekey,parent_safegraph_place_id,location_name,safegraph_brand_ids,brands,top_category,sub_category,naics_code,latitude,longitude))
+
+
+filtered_pois<-data.table(filtered_pois)
+write.csv(filtered_pois,'small_filtered_pois.csv')
+```
