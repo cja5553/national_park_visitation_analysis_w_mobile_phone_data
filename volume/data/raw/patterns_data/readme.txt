@@ -1,6 +1,5 @@
 Data remains property of SafeGraph Inc. 
-Please contact safegraph or purchase the patterns dataset from safegraph at https://shop.safe.com 
-
+Please contact safegraph or purchase the patterns dataset from safegraph at https://shop.safegraph.com/?countries=US&poi=ALL
 Use the following steps: 
 
 
