@@ -34,32 +34,25 @@ library(bit64)
 options(scipen=999)
 ```
 
-
+# reading the file
 ```{r}
-combined <- rbind(read.csv("safegraph_comb_01_18.csv"),read.csv("safegraph_comb_02_18.csv"),read.csv("safegraph_comb_03_18.csv"),read.csv("safegraph_comb_04_18.csv"),read.csv("safegraph_comb_05_18.csv"),read.csv("safegraph_comb_06_18.csv"),read.csv("safegraph_comb_07_18.csv"),read.csv("safegraph_comb_08_18.csv"),read.csv("safegraph_comb_09_18.csv"),read.csv("safegraph_comb_10_18.csv"),read.csv("safegraph_comb_11_18.csv"),read.csv("safegraph_comb_12_18.csv"),read.csv("safegraph_comb_01_19.csv"),read.csv("safegraph_comb_02_19.csv"),read.csv("safegraph_comb_03_19.csv"),read.csv("safegraph_comb_04_19.csv"),read.csv("safegraph_comb_05_19.csv"),read.csv("safegraph_comb_06_19.csv"),read.csv("safegraph_comb_07_19.csv"),read.csv("safegraph_comb_08_19.csv"),read.csv("safegraph_comb_09_19.csv"),read.csv("safegraph_comb_10_19.csv"),read.csv("safegraph_comb_11_19.csv"),read.csv("safegraph_comb_12_19.csv"),read.csv("safegraph_comb_01_20.csv"),read.csv("safegraph_comb_02_20.csv"),read.csv("safegraph_comb_03_20.csv"),read.csv("safegraph_comb_04_20.csv"),read.csv("safegraph_comb_05_20.csv"),read.csv("safegraph_comb_06_20.csv"),read.csv("safegraph_comb_07_20.csv"),read.csv("safegraph_comb_08_20.csv"),read.csv("safegraph_comb_09_20.csv"),read.csv("safegraph_comb_10_20.csv"),read.csv("safegraph_comb_11_20.csv"),read.csv("safegraph_comb_12_20.csv"),read.csv("safegraph_comb_01_21.csv"),read.csv("safegraph_comb_02_21.csv"),read.csv("safegraph_comb_03_21.csv"),read.csv("safegraph_comb_04_21.csv"))
+combined <- read.csv("safegraph_comb")
 combined <- data.table(combined)
 write.csv(combined,file="combined_mega_doc.csv")
 ```
 
 
-
+# aggregating based on mean visitation records. 
 ```{r}
 combined<-subset(combined, select=c(safegraph_place_id,raw_visitor_counts,UNIT_NAME,PARKNAME,location_name,sub_category,latitude,longitude))
 combined[is.na(combined)] <- 0
-```
-
-```{r}
 aggdata <-aggregate(raw_visitor_counts~., data=combined, mean, na.rm=TRUE)
-```
-
-
-
-```{r}
 aggdata<-data.table(aggdata)
 names(aggdata)[names(aggdata) == "raw_visitor_counts"] <- "mean_monthly_visitations_record_counts"
 ```
 
 
+# arranging based on top 5 monthly records per national park
 ```{r}
 
 data_new3 <- aggdata[order(aggdata$mean_monthly_visitations_record_counts, decreasing = TRUE), ]  # Top N highest values by group
@@ -67,7 +60,7 @@ data_new3 <- data.table(data_new3, key = "UNIT_NAME")
 data_new3 <- data_new3[ , head(.SD, 5), by = UNIT_NAME]
 
 ```
-
+# writing file
 ```{r}
 write.csv(data_new3,file="top_mean_aggregated_POI.csv")
 ```
