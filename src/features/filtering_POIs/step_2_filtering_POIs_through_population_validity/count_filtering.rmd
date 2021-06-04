@@ -16,6 +16,7 @@ library(data.table)
 #install.packages('R.utils')
 ```
 
+# reading the filtered POIs data which was resulted from step_1
 ```{r}
 
 data<-read.csv("small_filtered_pois.csv")
@@ -28,9 +29,8 @@ list_name<-data$safegraph_place_id
 
 
 
-
+# reading and subsetting the patterns data from 2018 - 2021
 ```{r}
-#1
 safegraph1<-fread("patterns_comb.csv.gz")
 safegraph1<-data.table(safegraph1)
 safegraph1<-subset(safegraph1,select=c(date_range_start, date_range_end,safegraph_place_id,raw_visitor_counts, visitor_daytime_cbgs))
