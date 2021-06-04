@@ -31,35 +31,17 @@ list_name<-data$safegraph_place_id
 
 ```{r}
 #1
-safegraph1<-fread("patterns-part1.csv.gz")
+safegraph1<-fread("patterns_comb.csv.gz")
 safegraph1<-data.table(safegraph1)
 safegraph1<-subset(safegraph1,select=c(date_range_start, date_range_end,safegraph_place_id,raw_visitor_counts, visitor_daytime_cbgs))
 safegraph1<-safegraph1[(safegraph1$safegraph_place_id %in% list_name),]
 
-#2
-safegraph2<-fread("patterns-part2.csv.gz")
-safegraph2<-data.table(safegraph2)
-safegraph2<-subset(safegraph2,select=c(date_range_start, date_range_end,safegraph_place_id,raw_visitor_counts, visitor_daytime_cbgs))
-safegraph2<-safegraph2[(safegraph2$safegraph_place_id %in% list_name),]
-
-#3
-safegraph3<-fread("patterns-part3.csv.gz")
-safegraph3<-data.table(safegraph3)
-safegraph3<-subset(safegraph3,select=c(date_range_start, date_range_end,safegraph_place_id,raw_visitor_counts, visitor_daytime_cbgs))
-safegraph3<-safegraph3[(safegraph3$safegraph_place_id %in% list_name),]
-
-#4
-safegraph4<-fread("patterns-part4.csv.gz")
-safegraph4<-data.table(safegraph4)
-safegraph4<-subset(safegraph4,select=c(date_range_start, date_range_end,safegraph_place_id,raw_visitor_counts, visitor_daytime_cbgs))
-safegraph4<-safegraph4[(safegraph4$safegraph_place_id %in% list_name),]
 
 ```
 
 # Merge  
 ```{r}
-safegraph_comb<-rbind(safegraph1, safegraph2, safegraph3, safegraph4)
 safegraph_comb_05_18<-merge(safegraph_comb, data,by.x="safegraph_place_id",by.y="safegraph_place_id",all.x=T)
-write.csv(safegraph_comb_05_18,'safegraph_comb_05_18.csv')
+write.csv(safegraph_comb,'safegraph_comb.csv')
 ```
 
