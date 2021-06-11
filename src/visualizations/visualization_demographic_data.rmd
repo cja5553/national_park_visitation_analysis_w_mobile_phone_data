@@ -1,3 +1,4 @@
+# reading the neccessary packages and reading the datasets
 ```{r}
 
 library(data.table)
@@ -22,7 +23,9 @@ model2_covid<-model2[(model2$date_range_start>="2020-03-01"),]
 model2_covid$covid_era<-"After COVID19"
 model2<-rbind(model2_covid,model2_precovid)
 ```
+# Model 1
 
+## Plotting minority portion against parks visitations
 ```{r}
 #mynames<-c("pre-COVID", "COVID")
 
@@ -34,6 +37,7 @@ ggplot(data = model1, aes(x = minorityportion, y = visitor_count, color = covid_
              y = "monthly visitations to distinct national parks from each census block group", color="COVID/pre-covid era")+theme(axis.title.y = element_text(size = 8))
 
 ```
+## plotting distance against park visitations 
 
 ```{r}
 ggplot(data = model1, aes(x = dist, y = visitor_count, color = covid_era)) +
@@ -43,7 +47,7 @@ ggplot(data = model1, aes(x = dist, y = visitor_count, color = covid_era)) +
              y = "monthly visitations to distinct national parks from each census block group", color="COVID/pre-covid era")+theme(axis.title.y = element_text(size = 8))
 
 ```
-
+## plotting median age against parks visitions 
 
 ```{r}
 ggplot(data = model1, aes(x = median.age, y = visitor_count, color = covid_era)) +
@@ -52,7 +56,7 @@ ggplot(data = model1, aes(x = median.age, y = visitor_count, color = covid_era))
              x = "median age from each census block group",
              y = "monthly visitations to distinct national parks from each census block group", color="COVID/pre-covid era")+theme(axis.title.y = element_text(size = 8))
 ```
-
+## plotting median income against parks visitations
 ```{r}
 ggplot(data = model1, aes(x = MEDIAN.INCOME, y = visitor_count, color = covid_era)) +
         geom_smooth(method = "lm") +
@@ -64,6 +68,7 @@ ggplot(data = model1, aes(x = MEDIAN.INCOME, y = visitor_count, color = covid_er
 
 # Model 2  
 
+## plotting minority portion against parks visitations
 ```{r}
 #mynames<-c("pre-COVID", "COVID")
 
@@ -76,7 +81,7 @@ ggplot(data = model2, aes(x = minorityportion, y = visitor_count, color = covid_
 
 ```
 
-
+## plotting distance against parks visitions 
 ```{r}
 ggplot(data = model2, aes(x = dist, y = visitor_count, color = covid_era)) +
         geom_smooth(method = "lm") +
@@ -86,7 +91,7 @@ ggplot(data = model2, aes(x = dist, y = visitor_count, color = covid_era)) +
 
 ```
 
-
+## plotting median age against parks visitions
 ```{r}
 ggplot(data = model2, aes(x = median.age, y = visitor_count, color = covid_era)) +
         geom_smooth(method = "lm") +
@@ -96,7 +101,7 @@ ggplot(data = model2, aes(x = median.age, y = visitor_count, color = covid_era))
 ```
 
 
-
+## plotting median income against parks visitations
 ```{r}
 ggplot(data = model2, aes(x = median.age, y = visitor_count, color = covid_era)) +
         geom_smooth(method = "lm") +
