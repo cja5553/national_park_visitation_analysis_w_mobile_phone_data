@@ -6,8 +6,19 @@ library(scales)
 library(bit64)
 options(scipen = 999)
 census<-read.csv("census_info.csv")
-model1<-read.csv("model1.csv")
-model2<-read.csv("model2.csv")
+census<-read.csv("census_info.csv")
+model1<-read.csv("processed_model_1.csv")
+model2<-read.csv("processed_model_2.csv")
+model1_non<-model1[(model1$date_range_start<"2020-03-01"),]
+model1_covid<-model1[(model1$date_range_start>="2020-03-01"),]
+model1_covid$covid_era<-"After COVID19"
+model1_non$covid_era<-"Before COVID19"
+model2_non<-model2[(model2$date_range_start<"2020-03-01"),]
+model2_covid<-model2[(model2$date_range_start>="2020-03-01"),]
+model2_covid$covid_era<-"After COVID19"
+model2_non$covid_era<-"Before COVID19"
+model1<-rbind(model1_covid, model1_non)
+model2<-rbind(model2_covid, model2_non)
 
 # for model 1
 ## plotting proportion of minorities against visitation records
