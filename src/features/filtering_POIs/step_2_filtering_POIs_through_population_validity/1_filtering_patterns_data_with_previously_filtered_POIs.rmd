@@ -19,7 +19,7 @@ library(data.table)
 # reading the filtered POIs data which was resulted from step_1
 ```{r}
 
-data<-read.csv("small_filtered_pois.csv")
+data<-read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/interim/filtered_pois/filtered_POIs_based_on_geometry/small_filtered_pois.csv")
 data<-subset(data,!is.na(data$latitude))
 data<-subset(data,!is.na(data$longitude))
 data<-subset(data,select=-c(X, naics_code, UNIT_TYPE, pPolyID))
@@ -42,6 +42,6 @@ safegraph1<-safegraph1[(safegraph1$safegraph_place_id %in% list_name),]
 # Merge  
 ```{r}
 safegraph_comb_05_18<-merge(safegraph_comb, data,by.x="safegraph_place_id",by.y="safegraph_place_id",all.x=T)
-write.csv(safegraph_comb,'safegraph_comb.csv')
+write.csv(safegraph_comb,'national_park_visitation_analysis_w_mobile_phone_data/volume/data/interim/filtered_pois/filtered_pois_based_on_count/aggragated_count.csv')
 ```
 
