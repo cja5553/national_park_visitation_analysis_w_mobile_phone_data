@@ -20,7 +20,6 @@ library(bit64)
 options(scipen = 999)
 ```
 
-# For Model 1. 
 
 ## read the files
 ```{r}
@@ -61,47 +60,3 @@ data_merge2<-data_merge2 %>%
 ```{r}
 write.csv(data_merge2, file = 'processed_model_1.csv')
 ```
-
-
-# Perform the same for model 2. 
-
-## read the files
-```{r}
-aggragated <- read.csv("model_2_visitation_records.csv")
-aggragated<-subset(aggragated, select = -c(X))
-relevant_census <- read.csv("census_info.csv")
-relevant_census <- subset(relevant_census, select = -c(X))
-```
-
-## Merge census data with visitation records 
-```{r}
-data_merge1<-merge(x = aggragated, y = relevant_census, by.x = "vistor_census_block", by.y="Geo_FIPS", all.x = TRUE)
-```
-
-## Read the coordinate files for the census block group
-```{r}
-coordinates<-read.csv("cbg_geographic_data.csv")
-coordinates<-subset(coordinates, select = -c(amount_land, amount_water))
-names(coordinates)[names(coordinates) == "longitude"] <- "census_longitude"
-names(coordinates)[names(coordinates) == "latitude"] <- "census_latitude"
-
-```
-
-## Add census block group coordiantes to our dataset 
-```{r}
-data_merge2<-merge(x = data_merge1, y = coordinates, by.x = "vistor_census_block", by.y="census_block_group", all.x = TRUE)
-```
-
-
-## obtain distance from national parks to census block group
-```{r}
-data_merge2<-data_merge2 %>%  
-    mutate(dist = distHaversine(cbind(census_longitude, census_latitude), cbind(park_longitude, park_latitude)))
-```
-
-
-## Read the files
-```{r}
-write.csv(data_merge2, file = 'processed_model_2.csv')
-```
-
