@@ -34,7 +34,7 @@ options(scipen=999)
 ```
 
 
-# Model 1. 
+
 ```{r}
 model1<-read.csv("model1.csv")
 model1$date_range_start<-as.Date(model1$date_range_start,"%Y-%m-%d")
@@ -48,16 +48,4 @@ write.csv(model1,"model1.csv")
 ```
 
 
-# Model 2. 
-```{r}
-model2<-read.csv("model2.csv")
-model2$date_range_start<-as.Date(model2$date_range_start,"%Y-%m-%d")
-model2$date_range_end<-as.Date(model2$date_range_end,"%Y-%m-%d")
-model2_precovid<-model2[(model2$date_range_start<"2020-03-01"),]
-model2_precovid$covid_era<-F
-model2_covid<-model2[(model2$date_range_start>="2020-03-01"),]
-model2_covid$covid_era<-T
-model2<-rbind(model2_covid,model2_precovid)
-write.csv(model2,"model2.csv")
-```
 
