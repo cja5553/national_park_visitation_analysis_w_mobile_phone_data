@@ -15,9 +15,9 @@ options(scipen=999)
 
 # Reading files
 ```{r}
-race<-read.csv("race.csv")
-age<-read.csv("age.csv")
-income<-read.csv("income.csv")
+race<-read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/raw/census_files/race.csv")
+age<-read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/raw/census_files/age.csv")
+income<-read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/raw/census_files/income.csv")
 ```
 
 
@@ -48,7 +48,7 @@ relevant<-subset(merge2, select=c(median.age,minorityportion ,MEDIAN.INCOME,Geo_
 # Read data. 
 
 ```{r}
-write.csv(merge2,"MEGA_combined_census.csv")
-write.csv(relevant, "census_info.csv")
+#write.csv(merge2,"MEGA_combined_census.csv")
+write.csv(relevant, "national_park_visitation_analysis_w_mobile_phone_data/volume/data/processed/census_info.csv")
 ```
 
