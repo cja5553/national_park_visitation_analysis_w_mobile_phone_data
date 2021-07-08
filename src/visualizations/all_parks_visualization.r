@@ -1,7 +1,7 @@
 library(data.table)
 library(ggplot2)
 library(scales) 
-model1<-read.csv("cbg_data_model.csv")
+model1<-read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/processed/aggregated_records_based_on_census_block_groups.csv")
 model1$date_range_start<-as.Date(model1$date_range_start,"%Y-%m-%d")
 model1$date_range_end<-as.Date(model1$date_range_end,"%Y-%m-%d")
 d<-data.frame(date=as.Date(c("2020-01-21", "2020-03-11")), event=c("First US COVID case", "WHO declares COVID19 a global pandemic"))
