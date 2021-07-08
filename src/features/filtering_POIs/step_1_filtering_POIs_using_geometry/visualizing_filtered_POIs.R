@@ -1,26 +1,11 @@
----
-title: "Filtering of POIs"
-author: "Charles Alba"
-date: "January 30, 2021"
-output:
-  pdf_document: default
-  html_document: default
----
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
-```{r}
 require(sp)  
 require(rgdal)
 require(maps)
 args = commandArgs(trailingOnly=TRUE)
-```
 
 
-visualization 
-```{r}
+# visualization 
 
 data<-read.csv("small_filtered_pois.csv")
 data<-subset(data,!is.na(data$latitude))
@@ -34,5 +19,4 @@ proj4string(data)<-proj4string(poly_wgs84)
 plot(poly_wgs84)
 plot(data, add=TRUE, col="red")
 #plot(data, col="red")
-```
 
