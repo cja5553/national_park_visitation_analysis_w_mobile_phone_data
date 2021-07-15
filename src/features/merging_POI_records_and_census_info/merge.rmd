@@ -23,10 +23,13 @@ options(scipen = 999)
 
 ## read the files
 ```{r}
-aggragated <- read.csv("model_1_visitation_records.csv")
+aggragated <- read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/processed/aggregated_records_based_on_census_block_groups.csv
+")
 aggragated<-subset(aggragated, select = -c(X))
-relevant_census <- read.csv("census_info.csv")
+relevant_census <- read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/processed/census_info.csv")
 relevant_census <- subset(relevant_census, select = -c(X))
+population<-read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/raw/census_files/population_data.csv")
+
 ```
 
 ## Merge census data with visitation records 
@@ -55,8 +58,14 @@ data_merge2<-data_merge2 %>%
     mutate(dist = distHaversine(cbind(census_longitude, census_latitude), cbind(park_longitude, park_latitude)))
 ```
 
+## merge with population dataset
+```{r}
+data_merge3<-merge(x=data_merge2, y=data_merge2,  by.x = "vistor_census_block", by.y="Geo_FIPS", all.x=T)
+```
+
+
 
 ## Read the files
 ```{r}
-write.csv(data_merge2, file = 'national_park_visitation_analysis_w_mobile_phone_data/volume/data/processed/processed_model.csv')
+write.csv(data_merge3, file = 'national_park_visitation_analysis_w_mobile_phone_data/volume/data/processed/processed_model.csv')
 ```
