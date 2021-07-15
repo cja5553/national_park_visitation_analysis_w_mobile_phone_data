@@ -71,5 +71,5 @@ data_merge4<-merge(x=data_merge3, y=area,  by.x = "PARKNAME", by.y="PARKNAME", a
 
 ## Read the files
 ```{r}
-write.csv(data_merge3, file = 'national_park_visitation_analysis_w_mobile_phone_data/volume/data/processed/processed_model.csv')
+write.csv(data_merge4, file = 'national_park_visitation_analysis_w_mobile_phone_data/volume/data/processed/processed_model.csv')
 ```
