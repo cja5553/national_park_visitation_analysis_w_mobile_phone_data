@@ -1,0 +1,26 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Install the neccessary Packages
+
+```{r}
+require(sp)  
+require(rgdal)
+require(maps)
+args = commandArgs(trailingOnly=TRUE)
+```
+
+
+
+
+```{r}
+library(raster)
+poly <- readOGR("National_Parks","National_Parks")
+crs(poly)
+poly$area_sqkm <- area(poly) / 1000000
+
+area_data<-data.frame(poly$PARKNAME, poly$area_sqkm)
+write.csv(area_data, "area_data.csv")
+```
+
