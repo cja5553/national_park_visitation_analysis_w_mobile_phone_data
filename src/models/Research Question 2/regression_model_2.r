@@ -29,7 +29,7 @@ library(lattice)
 
 
 # Aggregate the data to find the total number of tourists from each census_block_group visiting all parks
-data<-read.csv("processed_model.csv")
+data<-read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/processed/processed_model.csv")
 data$date_range_start<-as.Date(data$date_range_start,"%Y-%m-%d")
 data$date_range_end<-as.Date(data$date_range_end,"%Y-%m-%d")
 data_non<-data[(data$date_range_start<"2020-03-01"),]
