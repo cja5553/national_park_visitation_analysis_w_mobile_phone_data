@@ -154,12 +154,20 @@ poly_ID5$row_number<-rownames(poly_ID5)
 newData5 <- merge(poly_ID5, org_data5, by.x="row_number", by.y="row_number", all.x=T)
 
 ```
+# because "North Cascades National Park" has inaccurate coordinates on SafeGraph's POI database, we have manually extract this POI
+```{r}
+safegraph<-rbind(org_data,org_data2,org_data3,org_data4,org_data5)
+safegraph_special_extraction<-safegraph[(safegraph$safegraph_place_id == "sg:a8c7746858474c499a242705615235b2"),]
+
+```
+
 # Concatenate data  
 
 Concatenate the 5 datasets  (newData)
 
 ```{r}
 filtered_pois <- rbind(newData, newData2, newData3, newData4, newData5)
+filtered_pois<- rbind(filtered_pois, safegraph_special_extraction)
 ```
 
 # Write data  
