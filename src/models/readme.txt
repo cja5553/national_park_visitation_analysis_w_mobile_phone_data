@@ -1,1 +1,3 @@
-
+"Research Question 1" for model relevant to "Research Question 1: How has COVID19 impacted visitations spanning racial diversity, income, age and distance to each respective national parks from the visitors communities of origin" in the manuscript
+"Research Question 2" for model relevant to "Research Question 2: How has COVID19 impacted a communities total visitation to national parks spanning racial diversity, income, age and distance to the closest respective national park" in the manuscript
+"Discussion" for model relevant to "How has COVID19 impacted total visitation to national parks151of race specific communities" under the discussion section in the manuscript. 
