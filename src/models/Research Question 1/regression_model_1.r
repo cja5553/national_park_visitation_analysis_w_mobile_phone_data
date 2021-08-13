@@ -61,13 +61,13 @@ data$date_range_start<-as.character(data$date_range_start)
 
 # Plotting the distribution plot
 
-hist(data$visitor_count,breaks=200, # histogram
+hist(data$ratio,breaks=200, # histogram
      col="peachpuff", # column color
      border="black",
      prob = TRUE, # show densities instead of frequencies
-     xlab = "Visitor Count",
-     main = "Density distribution Plot")
-lines(density(data$visitor_count), # density plot
+     xlab = "Visitor count per population",
+     main = "")
+lines(density(data$ratio), # density plot
       lwd = 2, # thickness of line
       col = "red")
 
