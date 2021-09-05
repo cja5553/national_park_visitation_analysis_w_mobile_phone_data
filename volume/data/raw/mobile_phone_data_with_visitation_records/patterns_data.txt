@@ -1,8 +1,1 @@
-Data remains property of SafeGraph Inc. 
-Please contact safegraph or purchase the patterns dataset from safegraph at https://shop.safegraph.com/?countries=US&poi=ALL
-Use the following steps: 
-
-
-Step 1: Select "USA" under locations and omit the rest of the entries
-Step 2: Select "Patterns" under "choose data" and purchase the data. 
-
+Mobile Phone data with visitation records are available on SafeGraph (which can be freely provided upon request from \href{https://www.safegraph.com/academics}{https://www.safegraph.com/academics})
