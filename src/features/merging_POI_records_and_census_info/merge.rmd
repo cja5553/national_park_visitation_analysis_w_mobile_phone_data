@@ -25,10 +25,9 @@ options(scipen = 999)
 ```{r}
 aggragated <- read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/interim/filtered_pois/structuring_park_visitation_records/visitation_records.csv")
 aggragated<-subset(aggragated, select = -c(X))
-relevant_census <- read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/interim/racial_demographics/census_info.csv")
+relevant_census <- read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/interim/racial_demographics/race.csv")
 relevant_census <- subset(relevant_census, select = -c(X))
-population<-read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/raw/census_files/population_data.csv")
-area<-read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/interim/census_files_cleaned_and_computed/area_data.csv")
+population<-read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/raw/American_Community_Survey_Census_data/population_data.csv")
 ```
 
 ## Merge census data with visitation records 
