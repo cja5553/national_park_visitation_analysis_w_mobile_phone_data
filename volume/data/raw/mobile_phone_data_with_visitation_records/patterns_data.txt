@@ -1,1 +1,1 @@
-Mobile Phone data with visitation records are available on SafeGraph (which can be freely provided upon request from \href{https://www.safegraph.com/academics}{https://www.safegraph.com/academics})
+Mobile Phone data with visitation records are available on SafeGraph (which can be freely provided upon request from https://www.safegraph.com/academics)
