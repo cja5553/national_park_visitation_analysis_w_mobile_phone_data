@@ -1,3 +1,1 @@
-Because the file is large, please refer to the link below for the relevant files: 
-https://figshare.com/s/087459d13c6049b6b99b
-
+Mobile Phone POI data with visitation records are available on SafeGraph (which can be freely provided upon request from https://www.safegraph.com/academics)
