@@ -1,1 +1,1 @@
-
+Alternately, American Community Survey (ACS) Data with racial and population demographics for each census block group is available at the ACS website (https://www.socialexplorer.com/tables/ACS2019_5yr/R12847148)
