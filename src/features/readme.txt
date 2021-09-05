@@ -1,3 +1,3 @@
-"Filtering POIs" for the filtration of relevant POIs - refer to "Extraction of POIs" under "Materials" subsection in the "Methods and Materials" Section of manuscript. 
-"filtering_and_computing_census_variables" for the computation of racial demographics for each census block group - refer to "Computing Census Block Group Based Socio-economic determinants" under "Materials" subsection in the "Methods and Materials" Section of manuscript. 
-"merging_POI_records_and_census_info" for merging the 2 aforementioned data - POI data with the relevant racial demographics
+"Filtering POIs" - refer to "Extraction of POIs" under "Materials" subsection in the "Methods and Materials" Section of manuscript. 
+"filtering_and_computing_census_variables" refer to "Computing census block group based racial demographics" under "Materials" subsection in the "Methods and Materials" Section of manuscript. 
+"merging_POI_records_and_census_info" for merging the 2 aforementioned data - vistation records data with the relevant racial demographics
