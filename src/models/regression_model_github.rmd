@@ -1,0 +1,892 @@
+
+# Reading the data and preparing it for the regression analysis. 
+## Download library packages and load datasets
+```{r}
+library(effects)
+library(cowplot)
+library(gridExtra)
+library(grid)
+library(ggplot2)
+library(lattice)
+library(ggpubr)
+library(effects)
+library(stargazer)
+library(purrr)
+library(plm)
+library(data.table)
+library(bit64)
+options(scipen = 999)
+library(knitr)
+library(broom)
+library(tseries) # for `adf.test()`
+library(dynlm) #for function `dynlm()`
+library(vars) # for function `VAR()`
+library(nlWaldTest) # for the `nlWaldtest()` function
+library(lmtest) #for `coeftest()` and `bptest()`.
+library(car) #for `hccm()` robust standard errors
+library(sandwich)
+library(knitr) #for `kable()`
+library(forecast) 
+library(systemfit)
+library(AER)
+library(xtable)
+library(jtools)
+library(devtools)
+library(interactions)
+library(ggplot2)
+library(sjPlot)
+library(sjmisc)
+data<-read.csv("model.csv")
+data<-subset(data, select = c(vistor_census_block,minorityportion,median.age,dist,MEDIAN.INCOME, visitor_count, PARKNAME, date_range_start))
+#write.csv(data, file="model.csv")
+population<-read.csv("population_data.csv") # read and merge the population dataset to include population
+data<-merge(data,population, by.x="vistor_census_block",by.y="Geo_FIPS", all.x=T)
+data<-data[complete.cases(data), ]
+data$dist<-(data$dist)/1000 # Standardize distance to kilometers
+```
+
+## Remove Puerto Rico, Hawaii, Alaska, US minor Islands. 
+```{r}
+data$length<-floor(log10(data$vistor_census_block)) + 1
+data_eleven<-data[(data$length==11),]
+data_eleven$first<-as.numeric(substr(data_eleven$vistor_census_block, 1, 1))
+data_twelve<-data[(data$length==12),]
+data_twelve$first_second<-as.numeric(substr(data_twelve$vistor_census_block, 1, 2))
+data_eleven<-data_eleven[!data_eleven$first == 2, ]
+cbg_unwanted<-c(60,66,69,72,78,15)
+data_twelve<-data_twelve[!data_twelve$first_second %in% cbg_unwanted,]
+data_eleven<-subset(data_eleven, select=-c(length, first))
+data_twelve<-subset(data_twelve, select=-c(length, first_second))
+data<-rbind(data_eleven,data_twelve)
+
+
+```
+
+
+## Prepare the model for Regression. 
+```{r}
+data[data==0] = 0.0000000000000000000001 # Beacause natural log could not take 0's
+# Classify COVID vs non-COVID era
+data$date_range_start<-as.Date(data$date_range_start,"%Y-%m-%d") 
+data_non<-data[(data$date_range_start<"2020-03-01"),]
+data_covid<-data[(data$date_range_start>="2020-03-01"),]
+data_covid$covid_era<-TRUE
+data_non$covid_era<-FALSE
+data<-rbind(data_covid, data_non)
+data<-data[complete.cases(data), ]
+data$date_range_start<-month(as.POSIXlt(data$date_range_start, format="%d/%m/%Y")) #formatting the dates
+data$date_range_start<-as.character(data$date_range_start)
+data<-data[complete.cases(data), ]
+
+```
+
+
+# Performing Regression 
+
+Steps:
+1. Construct the different models (fixed model, pooled model and Random). 
+2. Test for the most appropriate model using the F-test, Hausman test, and BP test. 
+3. Find the summary of the best model. 
+4. Test for Multicollinearity
+5. Construct Interaction Plots
+
+
+## Race = None
+### Creating Different models and testing if they are suitable
+
+### Creating the models  
+
+
+#### Fixed model
+
+```{r}
+fixed_model <- plm(log(visitor_count) ~covid_era+ log(dist)+covid_era:log(dist)+log(population/1000),data = data,index = c("date_range_start"), model="within")
+```
+
+
+#### pooled model 
+```{r}
+
+pooled_model <- plm(log(visitor_count) ~covid_era+ log(dist)+covid_era:log(dist)+log(population/1000),data = data,index = c("date_range_start"), model="pooling")
+ 
+```
+
+
+#### random model
+```{r}
+random_model <- plm(log(visitor_count) ~covid_era+ log(dist)+covid_era:log(dist)+log(population/1000),data = data,index = c("date_range_start"), model="random")
+```
+
+
+### Testing to see which model is better
+
+#### test for fixed vs pooled_model
+```{r}
+
+pFtest(fixed_model, pooled_model) # REJECT POOLED MODEL
+```
+
+#### Test for fixed vs random effects  
+
+```{r}
+phtest(fixed_model, random_model) # fixed model is better
+```
+
+
+#### Test for pooled vs random effects
+```{r}
+plmtest(pooled_model, type=c("bp"))
+```
+
+
+
+## Random model is the best so we can the fixed model results
+
+```{r}
+summary(random_model)
+```
+```{r}
+stargazer(random_model, type = "text",add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
+```
+
+
+#### Testing for Multicollinearity
+
+```{r}
+vif(lm(log(visitor_count) ~covid_era+log(dist)+covid_era:log(dist)+covid_era:log(dist):log(minorityportion)+log(population/1000)+(date_range_start), data=data))
+```
+
+## Getting the interaction plots
+
+### variable distance 
+
+```{r}
+none.random.2 <- effect('covid_era*log(dist)', random_model,xlevels=list(log(data$dist)),se=TRUE, confidence.level=.95, typical=mean)
+
+#Put data in data frame 
+none.random.2 <-as.data.frame(none.random.2)
+#random.2$covid_era<-factor(random.2$covid_era,
+#              levels=c("True", "False"))
+
+none.Plot.2<-ggplot(data=none.random.2 , aes(x=log(dist), y=fit, group=covid_era))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=covid_era))+
+      ylab("ln(visitation)")+
+      xlab("ln(distance in km)")+
+      ggtitle("Interact Plot between distance and covid era")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()+ labs(colour = "COVID19 era")
+none.Plot.2
+```
+
+
+
+## Race = non-white
+
+### Creating Different models and testing if they are suitable
+
+### Creating the models  
+
+
+#### Fixed model
+
+```{r}
+fixed_model <- plm(log(visitor_count) ~covid_era+ log(minorityportion)+log(dist)+covid_era:log(minorityportion)+covid_era:log(dist)+log(dist):log(minorityportion)+covid_era:log(dist):log(minorityportion)+log(population/1000),data = data,index = c("date_range_start"), model="within")
+```
+
+
+#### pooled model 
+```{r}
+
+pooled_model <- plm(log(visitor_count) ~covid_era+ log(minorityportion)+log(dist)+covid_era:log(minorityportion)+covid_era:log(dist)+log(dist):log(minorityportion)+covid_era:log(dist):log(minorityportion)+log(population/1000),data = data,index = c("date_range_start"),model="pooling")
+ 
+```
+
+
+#### random model
+```{r}
+random_model <- plm(log(visitor_count) ~covid_era+log(minorityportion)+log(dist)+covid_era:log(minorityportion)+log(minorityportion)+covid_era:log(dist)+log(dist):log(minorityportion)+covid_era:log(dist):log(minorityportion)+log(population/1000),data = data,index = c("date_range_start"), model="random")
+```
+
+
+### Testing to see which model is better
+
+#### test for fixed vs pooled_model
+```{r}
+
+pFtest(fixed_model, pooled_model) # REJECT POOLED MODEL
+```
+
+### Test for fixed vs random effects  
+```{r}
+phtest(fixed_model, random_model) # fixed model is better
+```
+
+
+### Test for pooled vs random effects
+```{r}
+plmtest(pooled_model, type=c("bp"))
+```
+
+
+
+## Random model is the best so we can the fixed model results
+
+```{r}
+summary(random_model)
+```
+```{r}
+stargazer(random_model, type = "text",add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
+```
+
+
+
+#### Testing for multicollinearity
+```{r}
+vif(lm(log(visitor_count) ~covid_era+ log(minorityportion)+log(dist)+covid_era:log(minorityportion)+covid_era:log(dist)+log(dist):log(minorityportion)+covid_era:log(dist):log(minorityportion)+log(population/1000)+(date_range_start), data=data))
+```
+
+## Getting the interaction plots
+
+### variable race (non-white)
+
+```{r}
+#Our interaction
+non.white.random.1 <- effect('covid_era*log(minorityportion)', random_model,xlevels=list(log(data$minorityportion)),se=TRUE, confidence.level=.95, typical=mean)
+
+#Put data in data frame 
+non.white.random.1 <-as.data.frame(non.white.random.1)
+#random.2$covid_era<-factor(random.2$covid_era,
+#              levels=c("True", "False"))
+
+non.white.Plot.1<-ggplot(data=non.white.random.1, aes(x=((minorityportion)), y=fit, group=covid_era))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=covid_era))+
+      ylab("ln(visitation)")+
+      xlab("% of non-white")+
+      ggtitle("Interact Plot between non-whites and covid era")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()+ labs(colour = "COVID19 era") 
+non.white.Plot.1
+
+
+```
+
+### variable distance 
+
+```{r}
+non_white.random.2 <- effect('covid_era*log(dist)', random_model,xlevels=list(log(data$dist)),se=TRUE, confidence.level=.95, typical=mean)
+
+#Put data in data frame 
+non_white.random.2 <-as.data.frame(non_white.random.2)
+#random.2$covid_era<-factor(random.2$covid_era,
+#              levels=c("True", "False"))
+
+non_white.Plot.2<-ggplot(data=non_white.random.2 , aes(x=log(dist), y=fit, group=covid_era))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=covid_era))+
+      ylab("ln(visitation)")+
+      xlab("ln(distance in km)")+
+      ggtitle("Interact Plot between distance and covid era")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()+ labs(colour = "COVID19 era")
+non_white.Plot.2
+```
+
+
+### Variable Distance and Race
+```{r}
+#Run the interaction 
+
+sd.3<-sd(log(data[data$covid_era==F,]$minorityportion))
+
+non_white.random.3 <- effect('log(minorityportion)*log(dist)', random_model,xlevels=list(log(data[data$covid_era==F,]$dist),log(data[data$covid_era==F,]$minorityportion)),se=TRUE, confidence.level=.95, typical=mean)
+
+
+#Put data in data frame 
+non_white.random.3<- as.data.frame(non_white.random.3)
+
+#Check out what the "head" (first 6 rows) of your data looks like
+#head(random.4)
+non_white.Plot.3<-ggplot(data=non_white.random.3, aes(x=minorityportion, y=fit, group=dist))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=dist))+
+      ylab("ln(visitation)")+
+      xlab("% of non-whites")+
+      ggtitle("COVID era = FALSE")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),legend.position = "none")+
+      scale_fill_grey()+ labs(colour = "distance (m)")
+non_white.Plot.3
+
+#Plot.HandPick 
+
+#Run the interaction 
+
+sd.5<-sd(log(data[data$covid_era==T,]$minorityportion))
+
+non_white.random.4 <- effect('log(minorityportion)*log(dist)', random_model,xlevels=list(log(data[data$covid_era==T,]$dist),log(data[data$covid_era==T,]$minorityportion)),se=TRUE, confidence.level=.95, typical=mean)
+
+
+#Put data in data frame 
+non_white.random.4<- as.data.frame(non_white.random.4)
+
+
+
+library(ggplot2)                
+non_white.Plot.4<-ggplot(data=non_white.random.4, aes(x=minorityportion, y=fit, group=dist))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=dist))+
+      ylab("ln(visitation)")+
+      xlab("% of non-whites")+
+      ggtitle("COVID era = TRUE")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()+ labs(colour = "distance (m)")
+#Plot.5
+
+non_white.threeway<-ggarrange(non_white.Plot.3, non_white.Plot.4, ncol=2,widths=c(4/9,5/9))
+non_white.threeway<-annotate_figure(non_white.threeway, top = textGrob("Interact Plot between distance and percent of non-whites and COVID era"))
+```
+
+
+## Race = African American
+
+## Creating Different models and testing if they are suitable
+
+### Creating the models  
+
+
+#### Fixed model
+
+```{r}
+fixed_model <- plm(log(visitor_count) ~covid_era+ log(percent_black)+log(dist)+covid_era:log(percent_black)+covid_era:log(dist)+log(dist):log(percent_black)+covid_era:log(dist):log(percent_black)+log(population/1000),data = data,index = c("date_range_start"), model="within")
+```
+
+
+#### pooled model 
+```{r}
+
+pooled_model <- plm(log(visitor_count) ~covid_era+ log(percent_black)+log(dist)+covid_era:log(percent_black)+covid_era:log(dist)+log(dist):log(percent_black)+covid_era:log(dist):log(percent_black)+log(population/1000),data=data ,index = c("date_range_start"),model="pooling")
+ 
+```
+
+
+#### random model
+```{r}
+random_model <- plm(log(visitor_count) ~covid_era+ log(percent_black)+log(dist)+covid_era:log(percent_black)+covid_era:log(dist)+log(dist):log(percent_black)+covid_era:log(dist):log(percent_black)+log(population/1000),data=data,index = c("date_range_start"), model="random")
+```
+
+
+### Testing to see which model is better
+
+#### test for fixed vs pooled_model
+```{r}
+
+pFtest(fixed_model, pooled_model) # REJECT POOLED MODEL
+```
+
+#### Test for fixed vs random effects  
+
+```{r}
+phtest(random_model, fixed_model) # fixed model is better
+```
+#### Test for pooled vs random effects
+```{r}
+plmtest(pooled_model, type=c("bp"))
+```
+
+### Random Model is the best so we use random model results
+
+```{r}
+summary(random_model)
+```
+
+```{r}
+stargazer(random_model, type = "text",add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
+```
+
+#### Testing for Multi-collinearity
+
+```{r}
+vif(lm(log(visitor_count) ~covid_era+ log(percent_black)+log(dist)+covid_era:log(percent_black)+covid_era:log(dist)+log(dist):log(percent_black)+covid_era:log(dist):log(percent_black)+log(population/1000)+(date_range_start),data = data))
+```
+
+
+## Getting Interaction Plots
+
+### Variable Distance
+```{r}
+black.random.2 <- effect('covid_era*log(dist)', random_model,xlevels=list(log(data$dist)),se=TRUE, hispanic.level=.95, typical=mean)
+
+#Put data in data frame 
+black.random.2 <-as.data.frame(black.random.2)
+#random.2$covid_era<-factor(random.2$covid_era,
+#              levels=c("True", "False"))
+
+black.Plot.2<-ggplot(data=black.random.2 , aes(x=log(dist), y=fit, group=covid_era))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=covid_era))+
+      ylab("ln(visitation)")+
+      xlab("ln(Distance in km)")+
+      ggtitle("Interact Plot between distance and covid era")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()+ labs(colour = "COVID19 era")
+black.Plot.2
+```
+
+### Variable Distance and Race
+```{r}
+black.random.4 <- effect('log(percent_black):log(dist)', random_model,xlevels=list(log(data$dist),log(data$percent_black)),se=TRUE, confidence.level=.95, typical=mean)
+
+
+#Put data in data frame 
+black.random.4<- as.data.frame(black.random.4)
+black.Plot.4<-ggplot(data=black.random.4, aes(x=percent_black, y=fit, group=dist))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=dist))+
+      ylab("ln(visitation)")+
+      xlab("% of African Americans")+
+      ggtitle("Interact Plot between distance and percent of African Americans")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()+ labs(colour = "distance (m)")
+black.Plot.4
+```
+
+## Hispanic
+### Creating Different models and testing if they are suitable
+
+#### Fixed model
+
+```{r}
+fixed_model <- plm(log(visitor_count) ~covid_era+ log(percent_hispanic)+log(dist)+covid_era:log(percent_hispanic)+covid_era:log(dist)+log(dist):log(percent_hispanic)+covid_era:log(dist):log(percent_hispanic)+log(population/1000),data = data,index = c("date_range_start"), model="within")
+```
+
+
+#### pooled model 
+```{r}
+
+pooled_model <- plm(log(visitor_count) ~covid_era+ log(percent_hispanic)+log(dist)+covid_era:log(percent_hispanic)+covid_era:log(dist)+log(dist):log(percent_hispanic)+covid_era:log(dist):log(percent_hispanic)+log(population/1000),data=data ,index = c("date_range_start"),model="pooling")
+ 
+```
+
+
+#### random model
+```{r}
+random_model <- plm(log(visitor_count) ~covid_era+ log(percent_hispanic)+log(dist)+covid_era:log(percent_hispanic)+covid_era:log(dist)+log(dist):log(percent_hispanic)+covid_era:log(dist):log(percent_hispanic)+log(population/1000),data=data,index = c("date_range_start"), model="random")
+```
+
+
+### Testing to see which model is better
+
+#### test for fixed vs pooled_model
+```{r}
+
+pFtest(fixed_model, pooled_model) # REJECT POOLED MODEL
+```
+
+#### Test for fixed vs random effects  
+
+```{r}
+phtest(fixed_model, random_model) # fixed model is better
+```
+
+#### Test for pooled vs random effects
+```{r}
+plmtest(pooled_model, type=c("bp"))
+```
+
+### Random Model is the best so we use random model results
+
+```{r}
+summary(random_model)
+```
+
+
+```{r}
+stargazer(random_model, type = "text",add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
+```
+
+#### Testing for Multi-collinearity
+```{r}
+vif(lm(log(visitor_count) ~covid_era+ log(percent_hispanic)+log(dist)+covid_era:log(percent_hispanic)+covid_era:log(dist)+log(dist):log(percent_hispanic)+covid_era:log(dist):log(percent_hispanic)+log(population/1000)+date_range_start,data=data))
+```
+
+
+## Creating Interaction Plots
+
+
+### Variable Distance 
+
+```{r}
+hispanic.random.2 <- effect('covid_era*log(dist)', random_model,xlevels=list(log(data$dist)),se=TRUE, hispanic.level=.95, typical=mean)
+
+#Put data in data frame 
+hispanic.random.2 <-as.data.frame(hispanic.random.2)
+#random.2$covid_era<-factor(random.2$covid_era,
+#              levels=c("True", "False"))
+
+hispanic.Plot.2<-ggplot(data=hispanic.random.2 , aes(x=log(dist), y=fit, group=covid_era))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=covid_era))+
+      ylab("ln(visitation)")+
+      xlab("ln(distance in km)")+
+      ggtitle("Interact Plot between distance and covid era")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()+ labs(colour = "COVID19 era")
+hispanic.Plot.2
+```
+
+### Variable Distance and race 
+
+```{r}
+hispanic.random.4 <- effect('log(percent_hispanic)*log(dist)', random_model,xlevels=list(log(data$dist),log(data$percent_hispanic)),se=TRUE, confidence.level=.95, typical=mean)
+
+
+#Put data in data frame 
+hispanic.random.4<- as.data.frame(hispanic.random.4)
+hispanic.Plot.4<-ggplot(data=hispanic.random.4, aes(x=percent_hispanic, y=fit, group=dist))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=dist))+
+      ylab("ln(visitation)")+
+      xlab("% of Hispanic")+
+      ggtitle("Interact Plot between distance and Percent of hispanics")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()+ labs(colour = "distance (m)")
+hispanic.Plot.4
+```
+
+
+
+## Race = Asian American
+### Creating Different models and testing if they are suitable
+
+
+#### Fixed model
+
+```{r}
+fixed_model <- plm(log(visitor_count) ~covid_era+ log(percent_asian)+log(dist)+covid_era:log(percent_asian)+covid_era:log(dist)+log(dist):log(percent_asian)+covid_era:log(dist):log(percent_asian)+log(population/1000),data = data,index = c("date_range_start"), model="within")
+```
+
+
+#### pooled model 
+```{r}
+
+pooled_model <- plm(log(visitor_count) ~covid_era+ log(percent_asian)+log(dist)+covid_era:log(percent_asian)+covid_era:log(dist)+log(dist):log(percent_asian)+covid_era:log(dist):log(percent_asian)+log(population/1000),data=data ,index = c("date_range_start"),model="pooling")
+ 
+```
+
+
+#### random model
+```{r}
+random_model <- plm(log(visitor_count) ~covid_era+ log(percent_asian)+log(dist)+covid_era:log(percent_asian)+covid_era:log(dist)+log(dist):log(percent_asian)+covid_era:log(dist):log(percent_asian)+log(population/1000),data=data,index = c("date_range_start"), model="random")
+```
+
+
+### Testing to see which model is better
+
+#### test for fixed vs pooled_model
+```{r}
+
+pFtest(fixed_model, pooled_model) # REJECT POOLED MODEL
+```
+
+#### Test for fixed vs random effects  
+
+```{r}
+phtest(random_model,fixed_model) # random model is better
+```
+
+####Test for pooled vs random effects
+```{r}
+plmtest(pooled_model, type=c("bp"))
+```
+
+#### Random model is the best so we can the fixed model results
+
+```{r}
+summary(random_model)
+```
+
+```{r}
+stargazer(random_model, type = "text",add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
+```
+
+
+### Testing for Multi-collinearity
+```{r}
+vif(lm(log(visitor_count) ~covid_era+ log(percent_asian)+log(dist)+covid_era:log(percent_asian)+covid_era:log(dist)+log(dist):log(percent_asian)+covid_era:log(dist):log(percent_asian)+log(population/1000)+(date_range_start),data = data))
+```
+
+### Getting Interaction Plots
+## Variable Distance
+
+```{r}
+asian.random.2 <- effect('covid_era*log(dist)', random_model,xlevels=list(log(data$dist)),se=TRUE, hispanic.level=.95, typical=mean)
+
+#Put data in data frame 
+asian.random.2 <-as.data.frame(asian.random.2)
+#random.2$covid_era<-factor(random.2$covid_era,
+#              levels=c("True", "False"))
+
+asian.Plot.2<-ggplot(data=asian.random.2 , aes(x=log(dist), y=fit, group=covid_era))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=covid_era))+
+      ylab("ln(visitation)")+
+      xlab("ln(Distance in m)")+
+      ggtitle("Interact Plot between distance and covid era")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()+ labs(colour = "COVID19 era")
+asian.Plot.2
+```
+
+## Variable Distance and Race
+```{r}
+asian.random.4 <- effect('log(percent_asian)*log(dist)', random_model,xlevels=list(log(data$dist),log(data$percent_asian)),se=TRUE, confidence.level=.95, typical=mean)
+
+
+#Put data in data frame 
+asian.random.4<- as.data.frame(asian.random.4)
+                
+asian.Plot.4<-ggplot(data=asian.random.4, aes(x=percent_asian, y=fit, group=dist))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=dist))+
+      ylab("ln(visitation)")+
+      xlab("% of Asian American")+
+      ggtitle("Interact Plot between distance and percent of Asian Americans")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()+ labs(colour = "distance (m)")
+#Plot.5
+asian.Plot.4
+```
+
+
+
+
+
+
+
+## Race = Indian American
+### Creating Different models and testing if they are suitable
+
+
+#### Fixed model
+
+```{r}
+fixed_model <- plm(log(visitor_count) ~covid_era+ log(percent_indian)+log(dist)+covid_era:log(percent_indian)+covid_era:log(dist)+log(dist):log(percent_indian)+covid_era:log(dist):log(percent_indian)+log(population/1000),data = data,index = c("date_range_start"), model="within")
+```
+
+
+#### pooled model 
+```{r}
+
+pooled_model <- plm(log(visitor_count) ~covid_era+ log(percent_indian)+log(dist)+covid_era:log(percent_indian)+covid_era:log(dist)+log(dist):log(percent_indian)+covid_era:log(dist):log(percent_indian)+log(population/1000),data=data ,index = c("date_range_start"),model="pooling")
+ 
+```
+
+
+#### random model
+```{r}
+random_model <- plm(log(visitor_count) ~covid_era+ log(percent_indian)+log(dist)+covid_era:log(percent_indian)+covid_era:log(dist)+log(dist):log(percent_indian)+covid_era:log(dist):log(percent_indian)+log(population/1000),data=data,index = c("date_range_start"), model="random")
+```
+
+
+### Testing to see which model is better
+
+#### test for fixed vs pooled_model
+```{r}
+
+pFtest(fixed_model, pooled_model) # REJECT POOLED MODEL
+```
+
+#### Test for fixed vs random effects  
+
+```{r}
+phtest(random_model,fixed_model) # random model is better
+```
+
+#### Test for pooled vs random effects
+```{r}
+plmtest(pooled_model, type=c("bp"))
+```
+
+### Random model is the best so we can the find results
+
+```{r}
+summary(random_model)
+```
+
+
+```{r}
+stargazer(random_model, type = "text",add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
+```
+
+#### Testing for Multicollinearity
+```{r}
+vif(lm(log(visitor_count) ~covid_era+ log(percent_indian)+log(dist)+covid_era:log(percent_indian)+covid_era:log(dist)+log(dist):log(percent_indian)+covid_era:log(dist):log(percent_indian)+log(population/1000)+(date_range_start),data = data))
+```
+
+
+## Plotting Interaction Plots
+### variable race 
+
+```{r}
+#Our interaction
+indian.random.1 <- effect('covid_era*log(percent_indian)',random_model,xlevels=list(log(data$percent_indian)),se=TRUE, confidence.level=.95, typical=mean)
+
+#Put data in data frame 
+indian.random.1 <-as.data.frame(indian.random.1)
+#random.2$covid_era<-factor(random.2$covid_era,
+#              levels=c("True", "False"))
+
+indian.Plot.1<-ggplot(data=indian.random.1, aes(x=percent_indian, y=fit, group=covid_era))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=covid_era))+
+      ylab("ln(visitation)")+
+      xlab("% of Native Americans")+
+      ggtitle("Interact Plot between Native Americans and covid era")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()+ labs(colour = "COVID19 era") 
+indian.Plot.1
+
+
+```
+
+### variable distance 
+
+```{r}
+indian.random.2 <- effect('covid_era*log(dist)', random_model,xlevels=list(log(data$dist)),se=TRUE, confidence.level=.95, typical=mean)
+
+#Put data in data frame 
+indian.random.2 <-as.data.frame(indian.random.2)
+#random.2$covid_era<-factor(random.2$covid_era,
+#              levels=c("True", "False"))
+
+indian.Plot.2<-ggplot(data=indian.random.2 , aes(x=log(dist), y=fit, group=covid_era))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=covid_era))+
+      ylab("ln(visitation)")+
+      xlab("Distance (m)")+
+      ggtitle("Interact Plot between distance and covid era")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()+ labs(colour = "COVID19 era")
+indian.Plot.2
+#Run the interaction 
+
+sd.3<-sd(log(data[data$covid_era==F,]$percent_indian))
+
+indian.random.3 <- effect('log(percent_indian)*log(dist)', random_model,xlevels=list(log(data[data$covid_era==F,]$dist),log(data[data$covid_era==F,]$percent_indian)),se=TRUE, confidence.level=.95, typical=mean)
+
+
+#Put data in data frame 
+indian.random.3<- as.data.frame(indian.random.3)
+
+#Check out what the "head" (first 6 rows) of your data looks like
+#head(random.4)
+indian.Plot.3<-ggplot(data=indian.random.3, aes(x=percent_indian, y=fit, group=dist))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=dist))+
+      ylab("ln(visitation)")+
+      xlab("% of Native Americans")+
+      ggtitle("COVID era = FALSE")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),legend.position = "none")+
+      scale_fill_grey()+ labs(colour = "distance (m)")
+indian.Plot.3
+
+#Plot.HandPick 
+```
+
+
+### Variable Distance and Race
+```{r}
+#Run the interaction 
+
+sd.5<-sd(log(data[data$covid_era==T,]$percent_indian))
+
+indian.random.4 <- effect('log(percent_indian)*log(dist)', random_model,xlevels=list(log(data[data$covid_era==T,]$dist),log(data[data$covid_era==T,]$percent_indian)),se=TRUE, confidence.level=.95, typical=mean)
+
+
+#Put data in data frame 
+indian.random.4<- as.data.frame(indian.random.4)
+
+
+
+library(ggplot2)                
+Indian.Plot.4<-ggplot(data=indian.random.4, aes(x=percent_indian, y=fit, group=dist))+  
+#For ylim, specify the range of your DV (in our case, 0-4)
+      geom_line(size=1, aes(color=dist))+
+      ylab("log(visitations)")+
+      xlab("% of Indian-Americans")+
+      ggtitle("COVID era = TRUE")+
+      theme_bw()+ 
+        theme(panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank())+
+      scale_fill_grey()+ labs(colour = "distance (m)")
+#Plot.5
+
+indian.threeway<-ggarrange(indian.Plot.3, Indian.Plot.4, ncol=2,widths=c(4/9,5/9))
+indian.threeway<-annotate_figure(indian.threeway, top = textGrob("Interact Plot between distance and percent of Indian-Americans and COVID era"))
+```
+
+
+
+# Compiling the plots 
+
+```{r}
+#install.packages("gridExtra")
+library(gridExtra)
+library(grid)
+library(ggplot2)
+library(lattice)
+not_measured<-ggplot() +annotate("text",x = 1,y = 1,size = 8,label = "Not in model")+theme_void()
+empty<-ggplot() +annotate("text",x = 1,y = 1,size = 8,label = "No significance")+theme_void()
+zero<-arrangeGrob(not_measured,none.Plot.2,not_measured,
+  nrow = 1,
+  left = textGrob("Race = (None)\n", rot = 90, vjust = 1,gp=gpar(cex=2.5)))
+first<-arrangeGrob(non.white.Plot.1,non_white.Plot.2,non_white.threeway,
+  nrow = 1,
+  left = textGrob("Race = Non-white\n", rot = 90, vjust = 1,gp=gpar(cex=2.5)))
+second<-arrangeGrob(
+  empty,black.Plot.2,black.Plot.4,
+  nrow = 1,
+  left = textGrob("Race = African American\n", rot = 90, vjust = 1,gp=gpar(cex=2.5)))
+third<-arrangeGrob(empty,hispanic.Plot.2,hispanic.Plot.4,
+  nrow = 1,
+  left = textGrob("Race = Hispanic\n", rot = 90, vjust = 1,gp=gpar(cex=2.5)))
+forth<-arrangeGrob(empty,asian.Plot.2,asian.Plot.4,
+  nrow = 1,
+  left = textGrob("Race = Asian American\n", rot = 90, vjust = 1,gp=gpar(cex=2.5)))
+fifth<-arrangeGrob(indian.Plot.1,indian.Plot.2,indian.threeway,
+  nrow = 1,
+  left = textGrob("Race = Native American\n", rot = 90, vjust = 1,gp=gpar(cex=2.5)))
+grid.arrange(zero,first,second,third,forth,fifth,nrow=6)
+```
+
+
+
