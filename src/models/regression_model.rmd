@@ -58,6 +58,27 @@ data<-rbind(data_eleven,data_twelve)
 
 
 ```
+# Getting summary Statistics
+```{r}
+data_race<-subset(data,select=c(vistor_census_block,population_per_thousand,percent_black,percent_hispanic,percent_asian,percent_indian,minorityportion))
+data_race<-data_race[!duplicated(data_race), ]
+data_race<-data_race[complete.cases(data_race), ]
+```
+
+```{r}
+summary(data_race)
+```
+
+```{r}
+nrow(data_race)
+```
+```{r}
+summary(data)
+```
+
+```{r}
+nrow(data)
+```
 
 
 ## Prepare the model for Regression. 
