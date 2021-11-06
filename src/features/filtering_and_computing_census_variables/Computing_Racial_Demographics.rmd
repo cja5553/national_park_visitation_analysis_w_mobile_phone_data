@@ -1,0 +1,54 @@
+```{r}
+library(effects)
+library(cowplot)
+library(gridExtra)
+library(grid)
+library(ggplot2)
+library(lattice)
+library(ggpubr)
+library(effects)
+library(stargazer)
+library(purrr)
+library(plm)
+library(data.table)
+library(bit64)
+options(scipen = 999)
+options(digits = 22)
+library(knitr)
+library(broom)
+library(tseries) # for `adf.test()`
+library(dynlm) #for function `dynlm()`
+library(vars) # for function `VAR()`
+library(nlWaldTest) # for the `nlWaldtest()` function
+library(lmtest) #for `coeftest()` and `bptest()`.
+library(car) #for `hccm()` robust standard errors
+library(sandwich)
+library(knitr) #for `kable()`
+library(forecast) 
+library(systemfit)
+library(AER)
+library(xtable)
+library(jtools)
+library(devtools)
+library(interactions)
+library(ggplot2)
+library(sjPlot)
+library(sjmisc)
+
+```
+
+
+```{r}
+census<-read.csv("national_park_visitation_analysis_w_mobile_phone_data/volume/data/raw/American_Community_Survey_Census_data/race.csv")
+library(tidyverse)
+census<-census %>% mutate_all(funs(str_replace(., "15000US", "")))
+census$Geo_FIPS<-census$Geo_GEOID
+census$percent_black<-as.numeric(census$african_american)/as.numeric(census$total)
+census$percent_hispanic<-as.numeric(census$Hispanic)/as.numeric(census$total)
+census$minorityportion<-1-(as.numeric(census$white)/as.numeric(census$total))
+census$percent_indian<-as.numeric(census$native_american)/as.numeric(census$total)
+census$percent_asian<-as.numeric(census$asian_american)/as.numeric(census$total)
+data<-subset(census, select=c(Geo_FIPS, minorityportion,percent_black,percent_hispanic,percent_asian,percent_indian))
+write.csv(census,"national_park_visitation_analysis_w_mobile_phone_data/volume/data/interim/racial_demographics/census_info.csv")
+```
+
