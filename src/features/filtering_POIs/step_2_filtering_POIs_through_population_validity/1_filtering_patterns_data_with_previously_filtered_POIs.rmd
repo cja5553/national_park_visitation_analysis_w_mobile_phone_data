@@ -33,7 +33,7 @@ list_name<-data$safegraph_place_id
 ```{r}
 safegraph1<-fread("patterns_comb.csv.gz")
 safegraph1<-data.table(safegraph1)
-safegraph1<-subset(safegraph1,select=c(date_range_start, date_range_end,safegraph_place_id,raw_visitor_counts, visitor_daytime_cbgs))
+safegraph1<-subset(safegraph1,select=c(date_range_start, date_range_end,safegraph_place_id,raw_visitor_counts, visitor_home_cbgs))
 safegraph1<-safegraph1[(safegraph1$safegraph_place_id %in% list_name),]
 
 
