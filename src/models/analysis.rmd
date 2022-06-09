@@ -152,7 +152,7 @@ plmtest(pooled_model, type=c("bp"))
 
 
 
-## Random model is the best so we can the fixed model results
+## Random model is the best so we can use the results
 
 ```{r}
 cov1<-vcovHC(random_model, type = "HC1") 
@@ -253,7 +253,7 @@ plmtest(pooled_model, type=c("bp"))
 
 
 
-## Random model is the best so we can the fixed model results
+## Random model is the best so we can use the results
 
 ```{r}
 cov1<-vcovHC(random_model, type = "HC1") 
@@ -609,7 +609,7 @@ phtest(random_model,fixed_model) # random model is better
 plmtest(pooled_model, type=c("bp"))
 ```
 
-#### Random model is the best so we can the fixed model results
+#### Random model is the best so we can use the results
 
 ```{r}
 cov1<-vcovHC(random_model, type = "HC1") 
