@@ -155,8 +155,12 @@ plmtest(pooled_model, type=c("bp"))
 ## Random model is the best so we can the fixed model results
 
 ```{r}
-summary(random_model)
+cov1<-vcovHC(random_model, type = "HC1") 
+robust_se    <- sqrt(diag(cov1)) 
+stargazer(random_model, type = "text",se = list(robust_se),add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
 ```
+
+
 ```{r}
 stargazer(random_model, type = "text",add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
 ```
@@ -252,7 +256,9 @@ plmtest(pooled_model, type=c("bp"))
 ## Random model is the best so we can the fixed model results
 
 ```{r}
-summary(random_model)
+cov1<-vcovHC(random_model, type = "HC1") 
+robust_se    <- sqrt(diag(cov1)) 
+stargazer(random_model, type = "text",se = list(robust_se),add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
 ```
 ```{r}
 stargazer(random_model, type = "text",add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
@@ -410,7 +416,9 @@ plmtest(pooled_model, type=c("bp"))
 ### Random Model is the best so we use random model results
 
 ```{r}
-summary(random_model)
+cov1<-vcovHC(random_model, type = "HC1") 
+robust_se    <- sqrt(diag(cov1)) 
+stargazer(random_model, type = "text",se = list(robust_se),add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
 ```
 
 ```{r}
@@ -503,7 +511,9 @@ plmtest(pooled_model, type=c("bp"))
 ### Random Model is the best so we use random model results
 
 ```{r}
-summary(random_model)
+cov1<-vcovHC(random_model, type = "HC1") 
+robust_se    <- sqrt(diag(cov1)) 
+stargazer(random_model, type = "text",se = list(robust_se),add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
 ```
 
 
@@ -602,7 +612,9 @@ plmtest(pooled_model, type=c("bp"))
 #### Random model is the best so we can the fixed model results
 
 ```{r}
-summary(random_model)
+cov1<-vcovHC(random_model, type = "HC1") 
+robust_se    <- sqrt(diag(cov1)) 
+stargazer(random_model, type = "text",se = list(robust_se),add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
 ```
 
 ```{r}
@@ -704,7 +716,9 @@ plmtest(pooled_model, type=c("bp"))
 ### Random model is the best so we can the find results
 
 ```{r}
-summary(random_model)
+cov1<-vcovHC(random_model, type = "HC1") 
+robust_se    <- sqrt(diag(cov1)) 
+stargazer(random_model, type = "text",se = list(robust_se),add.lines=list(c("Between R2",round(r.squared(update(random_model, effect = "individual", model = "between")), 3))))
 ```
 
 
