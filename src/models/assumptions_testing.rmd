@@ -56,7 +56,22 @@ data_twelve<-subset(data_twelve, select=-c(length, first_second))
 data<-rbind(data_eleven,data_twelve)
 
 
-# cleaning the data
+## cleaning the data 
+data[data==0] = 0.0000000000000000000001 # Beacause natural log could not take 0's
+# Classify COVID vs non-COVID era
+data$date_range_start<-as.Date(data$date_range_start,"%Y-%m-%d") 
+data_non<-data[(data$date_range_start<"2020-03-01"),]
+data_covid<-data[(data$date_range_start>="2020-03-01"),]
+data_covid$covid_era<-TRUE
+data_non$covid_era<-FALSE
+data<-rbind(data_covid, data_non)
+data<-data[complete.cases(data), ]
+data$date_range_start<-month(as.POSIXlt(data$date_range_start, format="%d/%m/%Y")) #formatting the dates
+data$date_range_start<-as.character(data$date_range_start)
+data<-data[complete.cases(data), ]
+
+
+
 data$population_per_thousand<-(data$population)/1000
 data<-subset(data, select=c(vistor_census_block,PARKNAME,covid_era,date_range_start,visitor_count,dist,population_per_thousand,percent_hispanic,percent_asian,percent_indian,percent_black,minorityportion))
 DT.m1 = melt(data, id.vars = c("vistor_census_block", "PARKNAME", "covid_era","date_range_start","visitor_count"),
