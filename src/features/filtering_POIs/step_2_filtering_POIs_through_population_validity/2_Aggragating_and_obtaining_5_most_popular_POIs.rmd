@@ -44,7 +44,7 @@ combined <- data.table(combined)
 
 # aggregating based on mean visitation records. 
 ```{r}
-combined<-subset(combined, select=c(safegraph_place_id,raw_visitor_counts,UNIT_NAME,PARKNAME,location_name,sub_category,latitude,longitude))
+combined<-subset(combined, select=c(safegraph_place_id,raw_visitor_counts,UNIT_NAME,PARKNAME,location_name,sub_category,latitude,longitude,visitor_cbgs))
 combined[is.na(combined)] <- 0
 aggdata <-aggregate(raw_visitor_counts~., data=combined, mean, na.rm=TRUE)
 aggdata<-data.table(aggdata)
