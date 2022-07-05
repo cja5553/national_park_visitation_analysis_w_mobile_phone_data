@@ -1,1 +1,1 @@
-
+Note: Due to SafeGraph's terms of service, census-level and POI-level visitation information could not be displayed. Only broadly aggregated data could be displayed. Please contact the main author (me) if you wish to obtain any relevant interim data that was used as part of the data wrangling or analysis process. 
