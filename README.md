@@ -11,4 +11,4 @@ Cite as: Alba, C., Pan, B., Yin, J., Rice, W. L., Mitra, P., Lin, M., & Liang, Y
 
 
 
-Please note that SafeGraph provides one with the option of using "visitor_daytime_cbg" vs "visitor_nighttime_cbg". We opted to use "visitor_daytime_cbg" because the computation of “visitor_nighttime_cbg” was changed on May 2020 , which coincided very closely to the start of COVID-19. So any changes detected from COVID-19 could have very well been confounded by changes resulting from SafeGraphs methodological changes. For more info, please refer to SafeGraphs documentation https://docs.safegraph.com/docs/monthly-patterns#section-algorithms. 
+Please note that SafeGraph provides one with the option of using "visitor_daytime_cbg" vs "visitor_nighttime_cbg". We opted to use "visitor_daytime_cbg" because the computation of “visitor_nighttime_cbg” was changed on May 2020, which coincided very closely to the start of COVID-19. So any changes detected from COVID-19 could have very well been confounded by changes resulting from SafeGraphs methodological changes. For more info, please refer to SafeGraphs documentation https://docs.safegraph.com/docs/monthly-patterns#section-algorithms. 
