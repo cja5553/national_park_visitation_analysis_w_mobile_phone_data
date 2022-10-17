@@ -141,7 +141,7 @@ pFtest(fixed_model, pooled_model) # REJECT POOLED MODEL
 #### Test for fixed vs random effects  
 
 ```{r}
-phtest(fixed_model, random_model) # fixed model is better
+phtest(fixed_model, random_model) # random model is better
 ```
 
 
@@ -242,7 +242,7 @@ pFtest(fixed_model, pooled_model) # REJECT POOLED MODEL
 
 ### Test for fixed vs random effects  
 ```{r}
-phtest(fixed_model, random_model) # fixed model is better
+phtest(fixed_model, random_model) # random model is better
 ```
 
 
@@ -406,7 +406,7 @@ pFtest(fixed_model, pooled_model) # REJECT POOLED MODEL
 #### Test for fixed vs random effects  
 
 ```{r}
-phtest(random_model, fixed_model) # fixed model is better
+phtest(random_model, fixed_model) # random model is better
 ```
 #### Test for pooled vs random effects
 ```{r}
@@ -500,7 +500,7 @@ pFtest(fixed_model, pooled_model) # REJECT POOLED MODEL
 #### Test for fixed vs random effects  
 
 ```{r}
-phtest(fixed_model, random_model) # fixed model is better
+phtest(fixed_model, random_model) # random model is better
 ```
 
 #### Test for pooled vs random effects
