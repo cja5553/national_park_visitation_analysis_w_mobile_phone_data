@@ -7,7 +7,7 @@ Status: Published in Scientific Reports
 
 
 
-Cite as: Alba, C., Pan, B., Yin, J. et al. COVID-19’s impact on visitation behavior to US national parks from communities of color: evidence from mobile phone data. Scientific Reports 12, 13398 (2022). https://doi.org/10.1038/s41598-022-16330-z 
+Please cite as: Alba, C., Pan, B., Yin, J. et al. COVID-19’s impact on visitation behavior to US national parks from communities of color: evidence from mobile phone data. Scientific Reports 12, 13398 (2022). https://doi.org/10.1038/s41598-022-16330-z 
 
 
 
