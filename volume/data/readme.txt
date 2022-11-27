@@ -5,3 +5,5 @@ Processed files are datasets which have been wrangled and are used to run the re
 Note: Due to SafeGraph's terms of service, census-level and POI-level visitation information could not be displayed. Only broadly aggregated data could be displayed. Please contact the main author (me) if you wish to obtain any relevant interim data that was used as part of the data wrangling or analysis process. 
 
 Details on the data types used can be referenced in the Supplemental Information of the manuscript (https://static-content.springer.com/esm/art%3A10.1038%2Fs41598-022-16330-z/MediaObjects/41598_2022_16330_MOESM1_ESM.pdf). 
+
+Note: SafeGraph provides one with the option of using "visitor_daytime_cbg" vs "visitor_nighttime_cbg". We opted to use "visitor_daytime_cbg" because the computation of “visitor_nighttime_cbg” was changed on May 2020, which coincided very close to the start of COVID-19. So any changes detected from COVID-19 could have very well been confounded by changes resulting from SafeGraphs methodological changes. For more info, please refer to SafeGraphs documentation https://docs.safegraph.com/docs/monthly-patterns#historical-data-and-backfills.
