@@ -2,8 +2,8 @@
 
 ## Directory
 
->>> src
->>> >>> contains the codes. 
+ src
+>>> contains the codes. 
 >>> >>> Includes the features (extraction of POIs, data wrangling, computing of racial demographics) and models (such as the analysis and visualizations)
 
 >>> volume
